@@ -7,15 +7,15 @@ using Verse;
 
 namespace EnhancedDevelopment.Example.ED_PhotoDay
 {
-    class Settings : ModBase
+    class ModBase_PhotoDay : ModBase
     {
         public override string ModIdentifier {
             get { return "ED-PhotoDay"; }
         }
 
-
-
+        
         public const int CHECK_INTERVAL_TICKS = 10000;
+
         public override void Tick(int currentTick)
         {
             base.Tick(currentTick);

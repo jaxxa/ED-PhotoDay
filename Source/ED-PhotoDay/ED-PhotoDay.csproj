@@ -52,7 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ED-PhotoDay\MapComponent_PhotoDay.cs" />
-    <Compile Include="ED-PhotoDay\Settings.cs" />
+    <Compile Include="ED-PhotoDay\ModBase_PhotoDay.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
