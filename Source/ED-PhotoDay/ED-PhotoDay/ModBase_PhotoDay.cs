@@ -86,12 +86,18 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             Log.Message("Next Hour is: " + _NextHour.ToString() + " Next Day: " + _NextDay.ToString());
 
             int _TicksThroughDay = (int)((_TicksAbsNow + this.LocalTicksOffsetFromLongitude((int)this.m_Longitude)) % 60000L);
-
-            int _TicksAtStartOfDay = _TicksAbsNow - _TicksThroughDay;
-
+            int _TicksAtStartOfDay = _TicksAbsNow - _TicksThroughDay;        
             Log.Message("_TicksAtStartOfDay: " + _TicksAtStartOfDay.ToString() + " _TicksThroughDay: " + _TicksThroughDay.ToString());
 
-            this.m_NextRunTicks = _TicksAtStartOfDay + _NextHour * GenDate.TicksPerHour;
+            int _DayOffset = 0;
+            if (int.Equals(0,_NextHour))
+            {
+                _NextHour = this.m_ScreenshotHours.FirstOrDefault();
+                _DayOffset = _NextDay - _CurrentDay;
+                Log.Message("Day offset: " + _DayOffset.ToString());
+            }
+
+            this.m_NextRunTicks = _TicksAtStartOfDay + _NextHour * GenDate.TicksPerHour + _DayOffset * GenDate.TicksPerDay;
             Log.Message("Running at: " + this.m_NextRunTicks);
 
         }
