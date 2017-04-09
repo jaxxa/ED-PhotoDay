@@ -18,7 +18,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
 
         List<int> m_ScreenshotDays;
         List<int> m_ScreenshotHours;
-        float m_Longitude;
+        //float m_Longitude;
 
         public override string ModIdentifier
         {
@@ -38,6 +38,10 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             //}
             //Log.Message("Current Tick: " + currentTick.ToString() + "Abs: " + Find.TickManager.TicksAbs.ToString());
 
+            this.InitiliseLongitudeIfRequired();
+
+
+            //On First Run Calculate the Time but dont Execute Operations.
             if (this.m_NextRunTicks == 0)
             {
                 this.CalculateNextRunTick(_TicksNowAbs);
@@ -58,6 +62,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             if (this.m_ScreenshotHours == null || this.m_ScreenshotDays == null)
             {
                 this.CalculateDaysAndHoursToRunOn();
+                this.InitiliseLongitude();
             }
 
             int _CurrentHour = GenDate.HourOfDay(ticksNowAbs, this.SettingTimeZoneLongitude);
@@ -69,7 +74,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             int _NextDay = this.m_ScreenshotDays.Where(item => item > _CurrentDay).FirstOrDefault();
             Log.Message("Next Hour is: " + _NextHour.ToString() + " Next Day: " + _NextDay.ToString());
 
-            int _TicksThroughDay = (int)((ticksNowAbs + this.LocalTicksOffsetFromLongitude((int)this.m_Longitude)) % 60000L);
+            int _TicksThroughDay = (int)((ticksNowAbs + this.LocalTicksOffsetFromLongitude((int)this.SettingTimeZoneLongitude)) % 60000L);
             int _TicksAtStartOfDay = ticksNowAbs - _TicksThroughDay;        
             Log.Message("_TicksAtStartOfDay: " + _TicksAtStartOfDay.ToString() + " _TicksThroughDay: " + _TicksThroughDay.ToString());
 
@@ -93,15 +98,23 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         
         private void CalculateDaysAndHoursToRunOn()
         {
-
             Log.Message("Parsing Days: " + SettingScreenshotDays + " Hours: " + SettingScreenshotHours);
             this.m_ScreenshotDays = SettingScreenshotDays.ToString().Split(',').Select(int.Parse).ToList();
             this.m_ScreenshotHours = SettingScreenshotHours.ToString().Split(',').Select(int.Parse).ToList();
             Log.Message("Days" + m_ScreenshotDays.Count.ToString() + " Hours: " + m_ScreenshotHours.Count.ToString());
+        }
 
-            this.m_Longitude = Find.WorldGrid.LongLatOf(Find.VisibleMap.Tile).x;
-            //GenDate.TimeZoneAt(Find.WorldGrid.LongLatOf(Find.VisibleMap.Tile).x );
+        private void InitiliseLongitudeIfRequired()
+        {
+            if (this.SettingRecalculateLongitudeNext)
+            {
+                this.SettingTimeZoneLongitude.Value = Find.WorldGrid.LongLatOf(Find.VisibleMap.Tile).x;
 
+                this.SettingRecalculateLongitudeNext.Value = false;
+
+                HugsLibController.SettingsManager.SaveChanges();
+
+            }
         }
         
         private void ExecureOperation()
@@ -145,8 +158,9 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         private SettingHandle<bool> SettingAutoPause;
         private SettingHandle<bool> SettingDisplayMessage;
 
+        private SettingHandle<bool> SettingRecalculateLongitudeNext;
         private SettingHandle<float> SettingTimeZoneLongitude;
-        private SettingHandle<float> SettingCheckIntervalTicks;
+        //private SettingHandle<float> SettingCheckIntervalTicks;
 
         private SettingHandle<string> SettingScreenshotHours;
         private SettingHandle<string> SettingScreenshotDays;
@@ -161,8 +175,10 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             this.SettingAutoPause = Settings.GetHandle<bool>("AutoPause", "Auto Pause", "Pause the game.", true);
             this.SettingDisplayMessage = Settings.GetHandle<bool>("DisplayMessage", "Display Message", "Show a message.", true);
 
+
+            this.SettingRecalculateLongitudeNext = Settings.GetHandle<bool>("RecalculateLongitude", "Recalculate Longitude", "Recalculate Longitude on next run.", true);
             this.SettingTimeZoneLongitude = Settings.GetHandle<float>("TimeZoneLongitude", "Time Zone Longitude", "The Longitude of the location to use as the refrence for Times.", 0.0f);
-            this.SettingCheckIntervalTicks = Settings.GetHandle<float>("CheckIntervalTicks", "CheckIntervalTicks", "How oftern to run the check to take a photo or not.", 1000);
+            //this.SettingCheckIntervalTicks = Settings.GetHandle<float>("CheckIntervalTicks", "CheckIntervalTicks", "How oftern to run the check to take a photo or not.", 1000);
 
             this.SettingScreenshotHours = Settings.GetHandle<string>("ScreenshotHours", "Screenshot Hours", "Take a Screenshot on these Hours, comma seperated. Defaults to Every 3 Hours.", "0,3,6,9,12,15,18,21");
             this.SettingScreenshotDays = Settings.GetHandle<string>("ScreenshotDays", "Screenshot Days", "Take a Screenshot on these Days, comma seperated. Defaults to Every Day.", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15");
