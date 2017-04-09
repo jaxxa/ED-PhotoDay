@@ -14,8 +14,6 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
     class ModBase_PhotoDay : ModBase
     {
 
-
-        private int m_LastRunTicks;
         private int m_NextRunTicks;
 
         List<int> m_ScreenshotDays;
@@ -31,53 +29,39 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         {
             base.Tick(currentTick);
 
+            int _TicksNowAbs = Find.TickManager.TicksAbs;
+
             //Check SettingCheckIntervalTicks
             //if (Find.TickManager.TicksAbs % this.SettingCheckIntervalTicks != 0)
             //{
             //    return;
             //}
-
+            //Log.Message("Current Tick: " + currentTick.ToString() + "Abs: " + Find.TickManager.TicksAbs.ToString());
 
             if (this.m_NextRunTicks == 0)
             {
-                this.CalculateNextRunTick();
+                this.CalculateNextRunTick(_TicksNowAbs);
                 return;
             }
 
-            if (this.m_NextRunTicks < Find.TickManager.TicksAbs)
+            if (this.m_NextRunTicks < _TicksNowAbs)
             {
                 this.ExecureOperation();
-                this.CalculateNextRunTick();
+                this.CalculateNextRunTick(_TicksNowAbs);
             }
 
         }
 
-        private void CalculateNextRunTick()
+        private void CalculateNextRunTick(int ticksNowAbs)
         {
             //If Settings have not been parsed do that now.
             if (this.m_ScreenshotHours == null || this.m_ScreenshotDays == null)
             {
                 this.CalculateDaysAndHoursToRunOn();
             }
-            int _TicksAbsNow = Find.TickManager.TicksAbs;
 
-            //int _Years;
-            //int _Seasons;
-            //int _Days;
-            //float _Hours;
-
-            //GenDate.TicksToPeriod(_Ticks, out _Years, out _Seasons, out _Days, out _Hours);
-
-            //Log.Message("Ticks:" + _Ticks.ToString() 
-            //        + " Years: " + _Years.ToString() 
-            //        + " Seasons: " + _Seasons.ToString() 
-            //        + " Days: " + _Days.ToString() 
-            //        + " Hours: " + _Hours.ToString());
-
-            //GenLocalDate.
-            //Season _CurrentSeason = GenDate.Season(_Ticks, this.SettingTimeZoneLongitude);
-            int _CurrentHour = GenDate.HourOfDay(_TicksAbsNow, this.SettingTimeZoneLongitude);
-            int _CurrentDay = GenDate.DayOfSeason(_TicksAbsNow, this.SettingTimeZoneLongitude) + 1; //On Day 1 the returns 0, valid to 14
+            int _CurrentHour = GenDate.HourOfDay(ticksNowAbs, this.SettingTimeZoneLongitude);
+            int _CurrentDay = GenDate.DayOfSeason(ticksNowAbs, this.SettingTimeZoneLongitude) + 1; //Convert from 0-14 to 1-15 as seen by user.
 
             Log.Message("CalculateNextRunTick Day:" + _CurrentDay.ToString() + " Hour " + _CurrentHour.ToString());
 
@@ -85,8 +69,8 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             int _NextDay = this.m_ScreenshotDays.Where(item => item > _CurrentDay).FirstOrDefault();
             Log.Message("Next Hour is: " + _NextHour.ToString() + " Next Day: " + _NextDay.ToString());
 
-            int _TicksThroughDay = (int)((_TicksAbsNow + this.LocalTicksOffsetFromLongitude((int)this.m_Longitude)) % 60000L);
-            int _TicksAtStartOfDay = _TicksAbsNow - _TicksThroughDay;        
+            int _TicksThroughDay = (int)((ticksNowAbs + this.LocalTicksOffsetFromLongitude((int)this.m_Longitude)) % 60000L);
+            int _TicksAtStartOfDay = ticksNowAbs - _TicksThroughDay;        
             Log.Message("_TicksAtStartOfDay: " + _TicksAtStartOfDay.ToString() + " _TicksThroughDay: " + _TicksThroughDay.ToString());
 
             int _DayOffset = 0;
@@ -106,9 +90,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         {
             return (long)GenDate.TimeZoneAt(longitude) * 2500L;
         }
-
-
-
+        
         private void CalculateDaysAndHoursToRunOn()
         {
 
@@ -121,9 +103,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             //GenDate.TimeZoneAt(Find.WorldGrid.LongLatOf(Find.VisibleMap.Tile).x );
 
         }
-
-
-
+        
         private void ExecureOperation()
         {
             if (this.SettingAutoPause)
@@ -157,8 +137,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             }
 
         }
-
-
+        
         #region Settings
 
         private SettingHandle<bool> SettingModRunning;
