@@ -29,6 +29,8 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         {
             base.Tick(currentTick);
 
+            if(!this.SettingModRunning) { return; }
+
             int _TicksNowAbs = Find.TickManager.TicksAbs;
 
             //Check SettingCheckIntervalTicks

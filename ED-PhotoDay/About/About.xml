@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-	<name>PhotoDay</name>
+	<name>ED-PhotoDay</name>
 	<targetVersion>0.16.00</targetVersion>
 	<author>Jaxxa</author>
 	<url>https://ludeon.com/forums/index.php?topic=18995</url>
 	<description>Version: 01.00.00
-		
-Discussion, Non Steam Downloads and GitHub Repositories of this mod is available at: https://ludeon.com/forums/index.php?topic=18995
-Please Use that Thread for Discussion / Feedback that would like me to reply to. 
-Ideally Bugs should be logged on GitHub although in the discussion thread is also fine.
+
+This mod functions as a reminder that will alert you on configurable ingame hours and days.
+It is designed for people who want to take screenshots regularly to show the growth of their game, but can be confgured to reming you of anything at that time.
+It can also be condigure to take a screnshot automatically at that time.
+
+You will need to configure it using the mod configuration menu included with HugsLib.
 	
-This is an Enhanced Development Mod for the Game Rimworld.
-The name and Description have been left Default.
+This mod Requires HugsLib to be installed and Enabled before it in the load order.
+	
+Discussion, Non Steam Downloads and GitHub Repositories of this mod is available at: https://ludeon.com/forums/index.php?topic=18995
 	</description>
 </ModMetaData>
