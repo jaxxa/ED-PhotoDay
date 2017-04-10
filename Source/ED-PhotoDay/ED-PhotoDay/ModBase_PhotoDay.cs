@@ -41,8 +41,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             //Log.Message("Current Tick: " + currentTick.ToString() + "Abs: " + Find.TickManager.TicksAbs.ToString());
 
             this.InitiliseLongitudeIfRequired();
-
-
+            
             //On First Run Calculate the Time but dont Execute Operations.
             if (this.m_NextRunTicks == 0)
             {
@@ -52,7 +51,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
 
             if (this.m_NextRunTicks < _TicksNowAbs)
             {
-                this.ExecureOperation();
+                this.ExecureOperation(_TicksNowAbs);
                 this.CalculateNextRunTick(_TicksNowAbs);
             }
 
@@ -64,7 +63,6 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             if (this.m_ScreenshotHours == null || this.m_ScreenshotDays == null)
             {
                 this.CalculateDaysAndHoursToRunOn();
-                this.InitiliseLongitude();
             }
 
             int _CurrentHour = GenDate.HourOfDay(ticksNowAbs, this.SettingTimeZoneLongitude);
@@ -119,7 +117,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             }
         }
         
-        private void ExecureOperation()
+        private void ExecureOperation(int ticksNowAbs)
         {
             if (this.SettingAutoPause)
             {
@@ -141,11 +139,11 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
 
                 string _FullFilePath = _ScreenshotFolderPath;
                 // _FullFilePath = _FullFilePath + (object)Path.DirectorySeparatorChar + GenDate.DaysPassedFloat.ToString() + ".jpg";
-                _FullFilePath = _FullFilePath + (object)Path.DirectorySeparatorChar + "_" +
-                                GenDate.YearsPassed.ToString() + "_" +
-                                GenDate.MonthsPassed.ToString() + "_" +
-                                GenDate.DaysPassed.ToString() + "_" +
-                                GenDate.HourInt(Find.TickManager.TicksAbs, this.SettingTimeZoneLongitude) + ".jpg";
+                _FullFilePath = _FullFilePath + (object)Path.DirectorySeparatorChar +
+                                GenDate.Year(ticksNowAbs, this.SettingTimeZoneLongitude) + "-" +
+                                GenDate.Season(ticksNowAbs, this.SettingTimeZoneLongitude) + "-" +
+                                (GenDate.DayOfSeason(ticksNowAbs, this.SettingTimeZoneLongitude)+1 ).ToString().PadLeft(2,'0') + "-" +
+                                GenDate.HourOfDay(ticksNowAbs, this.SettingTimeZoneLongitude).ToString().PadLeft(2,'0') + ".jpg";
 
                 Log.Message(_FullFilePath);
                 Application.CaptureScreenshot(_FullFilePath);
