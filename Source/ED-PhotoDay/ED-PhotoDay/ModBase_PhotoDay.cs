@@ -111,7 +111,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
                 this.SettingTimeZoneLongitude.Value = Find.WorldGrid.LongLatOf(Find.VisibleMap.Tile).x;
 
                 this.SettingRecalculateLongitudeNext.Value = false;
-
+                this.m_NextRunTicks = 0; //Reset to 0 so it will be recalculated.
                 HugsLibController.SettingsManager.SaveChanges();
 
             }
