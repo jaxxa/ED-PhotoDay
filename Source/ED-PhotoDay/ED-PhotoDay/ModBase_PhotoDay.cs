@@ -187,6 +187,17 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             this.SettingMessageContent = Settings.GetHandle<string>("MessageContent", "Message Content", "The Message content.", "Look your best, its Photo Day");
         }
 
+        public override void SettingsChanged()
+        {
+            Log.Message("SettingsChanged");
+
+            base.SettingsChanged();
+
+            this.m_ScreenshotHours = null;
+            this.m_ScreenshotDays = null;
+            this.m_NextRunTicks = 0;
+        }
+
         #endregion
 
     }
