@@ -29,35 +29,86 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         {
             base.Tick(currentTick);
 
-            if(!this.SettingModRunning) { return; }
+            if (!this.SettingModRunning) { return; }
 
             int _TicksNowAbs = Find.TickManager.TicksAbs;
 
-            //Check SettingCheckIntervalTicks
-            //if (Find.TickManager.TicksAbs % this.SettingCheckIntervalTicks != 0)
-            //{
-            //    return;
-            //}
-            //Log.Message("Current Tick: " + currentTick.ToString() + "Abs: " + Find.TickManager.TicksAbs.ToString());
 
-            this.InitiliseLongitudeIfRequired();
-            
-            //On First Run Calculate the Time but dont Execute Operations.
-            if (this.m_NextRunTicks == 0)
+            if (this.SettingAdvancedMode)
             {
-                this.CalculateNextRunTick(_TicksNowAbs);
-                return;
+
+                //Check SettingCheckIntervalTicks
+                //if (Find.TickManager.TicksAbs % this.SettingCheckIntervalTicks != 0)
+                //{
+                //    return;
+                //}
+                //Log.Message("Current Tick: " + currentTick.ToString() + "Abs: " + Find.TickManager.TicksAbs.ToString());
+
+                this.InitiliseLongitudeIfRequired();
+
+                //On First Run Calculate the Time but dont Execute Operations.
+                if (this.m_NextRunTicks == 0)
+                {
+                    this.CalculateNextRunTickAdvanced(_TicksNowAbs);
+                    return;
+                }
+
+                if (this.m_NextRunTicks < _TicksNowAbs)
+                {
+                    this.ExecureOperation(_TicksNowAbs);
+                    this.CalculateNextRunTickAdvanced(_TicksNowAbs);
+                }
+            }
+            else
+            {
+                if (this.SettingRecalculateTimeOrigin)
+                {
+                    this.SettingRecalculateTimeOrigin.Value = false;
+                    this.SettingTimeOriginTicksAbs.Value = _TicksNowAbs;
+                    HugsLibController.SettingsManager.SaveChanges();
+
+                }
+
+                if (this.m_NextRunTicks == 0)
+                {
+                    this.CalculateNextRunTick(_TicksNowAbs);
+                    return;
+                }
+
+
+                if (this.m_NextRunTicks < _TicksNowAbs)
+                {
+                    this.ExecureOperation(_TicksNowAbs);
+                    this.CalculateNextRunTick(_TicksNowAbs);
+                }
+
+
             }
 
-            if (this.m_NextRunTicks < _TicksNowAbs)
-            {
-                this.ExecureOperation(_TicksNowAbs);
-                this.CalculateNextRunTick(_TicksNowAbs);
-            }
 
         }
 
         private void CalculateNextRunTick(int ticksNowAbs)
+        {
+            int _TicksToWaitPerPhoto = (int)this.SettingHourDelay * GenDate.TicksPerHour;
+            int _TimePeriodsPassed = (ticksNowAbs - this.SettingTimeOriginTicksAbs) / _TicksToWaitPerPhoto;
+
+            int _NextRunTicks = this.SettingTimeOriginTicksAbs + ((_TimePeriodsPassed + 1) * _TicksToWaitPerPhoto);
+
+            Log.Message("CalculateNextRunTick" +
+                " ticksNowAbs: " + ticksNowAbs.ToString() +
+                " SettingTimeOriginTicksAbs: " + SettingTimeOriginTicksAbs.ToString() +
+                " _TicksToWaitPerPhoto:" + _TicksToWaitPerPhoto.ToString() +
+                " _TimePeriodsPassed: " + _TimePeriodsPassed.ToString() +
+                " _NextRunTicks" + _NextRunTicks.ToString());
+
+            this.m_NextRunTicks = _NextRunTicks;
+        }
+
+        #region AdvancedMode
+
+
+        private void CalculateNextRunTickAdvanced(int ticksNowAbs)
         {
             //If Settings have not been parsed do that now.
             if (this.m_ScreenshotHours == null || this.m_ScreenshotDays == null)
@@ -75,11 +126,11 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             Log.Message("Next Hour is: " + _NextHour.ToString() + " Next Day: " + _NextDay.ToString());
 
             int _TicksThroughDay = (int)((ticksNowAbs + this.LocalTicksOffsetFromLongitude((int)this.SettingTimeZoneLongitude)) % 60000L);
-            int _TicksAtStartOfDay = ticksNowAbs - _TicksThroughDay;        
+            int _TicksAtStartOfDay = ticksNowAbs - _TicksThroughDay;
             Log.Message("_TicksAtStartOfDay: " + _TicksAtStartOfDay.ToString() + " _TicksThroughDay: " + _TicksThroughDay.ToString());
 
             int _DayOffset = 0;
-            if (int.Equals(0,_NextHour))
+            if (int.Equals(0, _NextHour))
             {
                 _NextHour = this.m_ScreenshotHours.FirstOrDefault();
                 _DayOffset = _NextDay - _CurrentDay;
@@ -95,7 +146,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         {
             return (long)GenDate.TimeZoneAt(longitude) * 2500L;
         }
-        
+
         private void CalculateDaysAndHoursToRunOn()
         {
             Log.Message("Parsing Days: " + SettingScreenshotDays + " Hours: " + SettingScreenshotHours);
@@ -116,7 +167,9 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
 
             }
         }
-        
+
+        #endregion
+
         private void ExecureOperation(int ticksNowAbs)
         {
             if (this.SettingAutoPause)
@@ -142,21 +195,26 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
                 _FullFilePath = _FullFilePath + (object)Path.DirectorySeparatorChar +
                                 GenDate.Year(ticksNowAbs, this.SettingTimeZoneLongitude) + "-" +
                                 GenDate.Season(ticksNowAbs, this.SettingTimeZoneLongitude) + "-" +
-                                (GenDate.DayOfSeason(ticksNowAbs, this.SettingTimeZoneLongitude)+1 ).ToString().PadLeft(2,'0') + "-" +
-                                GenDate.HourOfDay(ticksNowAbs, this.SettingTimeZoneLongitude).ToString().PadLeft(2,'0') + ".jpg";
+                                (GenDate.DayOfSeason(ticksNowAbs, this.SettingTimeZoneLongitude) + 1).ToString().PadLeft(2, '0') + "-" +
+                                GenDate.HourOfDay(ticksNowAbs, this.SettingTimeZoneLongitude).ToString().PadLeft(2, '0') + ".jpg";
 
                 Log.Message(_FullFilePath);
                 Application.CaptureScreenshot(_FullFilePath);
             }
 
         }
-        
+
         #region Settings
 
         private SettingHandle<bool> SettingModRunning;
         private SettingHandle<bool> SettingAutoScreenshot;
         private SettingHandle<bool> SettingAutoPause;
         private SettingHandle<bool> SettingDisplayMessage;
+        
+        private SettingHandle<float> SettingHourDelay;
+        private SettingHandle<int> SettingTimeOriginTicksAbs;
+        private SettingHandle<bool> SettingRecalculateTimeOrigin;
+        private SettingHandle<bool> SettingAdvancedMode;
 
         private SettingHandle<bool> SettingRecalculateLongitudeNext;
         private SettingHandle<float> SettingTimeZoneLongitude;
@@ -168,6 +226,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         private SettingHandle<string> SettingMessageLabel;
         private SettingHandle<string> SettingMessageContent;
 
+
         public override void DefsLoaded()
         {
             this.SettingModRunning = Settings.GetHandle<bool>("ModRunning", "Mod Running", "True for the mod to do anything.", false);
@@ -175,13 +234,18 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             this.SettingAutoPause = Settings.GetHandle<bool>("AutoPause", "Auto Pause", "Pause the game.", true);
             this.SettingDisplayMessage = Settings.GetHandle<bool>("DisplayMessage", "Display Message", "Show a message.", true);
 
+            this.SettingHourDelay = Settings.GetHandle<float>("SettingHourDelay", "Hour Delay", "The number of ingame Hours to wait before taking images.", 24.0f);
+            this.SettingTimeOriginTicksAbs = Settings.GetHandle<int>("TimeOriginTicksAbs", "Time Origin Ticks Abs", "The Tick to use for as the Start Time, best to set using the floowing option.", 0);
+            this.SettingRecalculateTimeOrigin = Settings.GetHandle<bool>("RecalculateTimeOrigin", "Reset Time Origin", "Resets the Time Origin to the Current Time", true);
 
-            this.SettingRecalculateLongitudeNext = Settings.GetHandle<bool>("RecalculateLongitude", "Recalculate Longitude", "Recalculate Longitude on next run.", true);
-            this.SettingTimeZoneLongitude = Settings.GetHandle<float>("TimeZoneLongitude", "Time Zone Longitude", "The Longitude of the location to use as the refrence for Times.", 0.0f);
+            this.SettingAdvancedMode = Settings.GetHandle<bool>("AdvancedMode", "Advanced Mode", "Enabled Advanced Mode, not Currently Working.", false);
+
+            //this.SettingRecalculateLongitudeNext = Settings.GetHandle<bool>("RecalculateLongitude", "Recalculate Longitude", "Recalculate Longitude on next run.", true);
+            //this.SettingTimeZoneLongitude = Settings.GetHandle<float>("TimeZoneLongitude", "Time Zone Longitude", "The Longitude of the location to use as the refrence for Times.", 0.0f);
             //this.SettingCheckIntervalTicks = Settings.GetHandle<float>("CheckIntervalTicks", "CheckIntervalTicks", "How oftern to run the check to take a photo or not.", 1000);
 
-            this.SettingScreenshotHours = Settings.GetHandle<string>("ScreenshotHours", "Screenshot Hours", "Take a Screenshot on these Hours, comma seperated. Defaults to Every 3 Hours.", "0,3,6,9,12,15,18,21");
-            this.SettingScreenshotDays = Settings.GetHandle<string>("ScreenshotDays", "Screenshot Days", "Take a Screenshot on these Days, comma seperated. Defaults to Every Day.", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15");
+            //this.SettingScreenshotHours = Settings.GetHandle<string>("ScreenshotHours", "Screenshot Hours", "Take a Screenshot on these Hours, comma seperated. Defaults to Every 3 Hours.", "0,3,6,9,12,15,18,21");
+            //this.SettingScreenshotDays = Settings.GetHandle<string>("ScreenshotDays", "Screenshot Days", "Take a Screenshot on these Days, comma seperated. Defaults to Every Day.", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15");
 
             this.SettingMessageLabel = Settings.GetHandle<string>("MessageLabel", "Message Label", "The Label to use for Messages", "Photo Day");
             this.SettingMessageContent = Settings.GetHandle<string>("MessageContent", "Message Content", "The Message content.", "Look your best, its Photo Day");
