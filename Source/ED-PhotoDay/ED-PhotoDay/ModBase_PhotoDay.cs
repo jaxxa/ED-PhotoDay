@@ -191,11 +191,20 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
 
                 string _FullFilePath = _ScreenshotFolderPath;
                 // _FullFilePath = _FullFilePath + (object)Path.DirectorySeparatorChar + GenDate.DaysPassedFloat.ToString() + ".jpg";
-                _FullFilePath = _FullFilePath + (object)Path.DirectorySeparatorChar +
-                                GenDate.Year(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude) + "-" +
-                                GenDate.Season(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude) + "-" +
-                                (GenDate.DayOfSeason(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude) + 1).ToString().PadLeft(2, '0') + "-" +
-                                GenDate.HourOfDay(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude).ToString().PadLeft(2, '0') + ".jpg";
+                if (this.SettingAdvancedMode)
+                {
+                    _FullFilePath = _FullFilePath + (object)Path.DirectorySeparatorChar +
+                                    GenDate.Year(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude) + "-" +
+                                    GenDate.Season(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude) + "-" +
+                                    (GenDate.DayOfSeason(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude) + 1).ToString().PadLeft(2, '0') + "-" +
+                                    GenDate.HourOfDay(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude).ToString().PadLeft(2, '0') + ".jpg";
+                }
+                else
+                {
+                    _FullFilePath = _FullFilePath + (object)Path.DirectorySeparatorChar +
+                                    "Screenshot" + "-" +
+                                    ticksNowAbs.ToString() + ".jpg";
+                }
 
                 Log.Message(_FullFilePath);
                 Application.CaptureScreenshot(_FullFilePath);
@@ -215,12 +224,12 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         private SettingHandle<bool> SettingRecalculateTimeOrigin;
         private SettingHandle<bool> SettingAdvancedMode;
 
-        private SettingHandle<bool> SettingAdvancedRecalculateLongitudeNext;
-        private SettingHandle<float> SettingAdvancedTimeZoneLongitude;
+        private SettingHandle<bool> SettingAdvancedRecalculateLongitudeNext = null;
+        private SettingHandle<float> SettingAdvancedTimeZoneLongitude = null;
         //private SettingHandle<float> SettingCheckIntervalTicks;
 
-        private SettingHandle<string> SettingAdvancedScreenshotHours;
-        private SettingHandle<string> SettingAdvancedScreenshotDays;
+        private SettingHandle<string> SettingAdvancedScreenshotHours = null;
+        private SettingHandle<string> SettingAdvancedScreenshotDays = null;
 
         private SettingHandle<string> SettingMessageLabel;
         private SettingHandle<string> SettingMessageContent;
