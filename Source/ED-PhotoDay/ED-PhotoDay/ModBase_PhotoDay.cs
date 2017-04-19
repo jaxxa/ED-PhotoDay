@@ -107,7 +107,6 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
 
         #region AdvancedMode
 
-
         private void CalculateNextRunTickAdvanced(int ticksNowAbs)
         {
             //If Settings have not been parsed do that now.
@@ -116,8 +115,8 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
                 this.CalculateDaysAndHoursToRunOn();
             }
 
-            int _CurrentHour = GenDate.HourOfDay(ticksNowAbs, this.SettingTimeZoneLongitude);
-            int _CurrentDay = GenDate.DayOfSeason(ticksNowAbs, this.SettingTimeZoneLongitude) + 1; //Convert from 0-14 to 1-15 as seen by user.
+            int _CurrentHour = GenDate.HourOfDay(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude);
+            int _CurrentDay = GenDate.DayOfSeason(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude) + 1; //Convert from 0-14 to 1-15 as seen by user.
 
             Log.Message("CalculateNextRunTick Day:" + _CurrentDay.ToString() + " Hour " + _CurrentHour.ToString());
 
@@ -125,7 +124,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             int _NextDay = this.m_ScreenshotDays.Where(item => item > _CurrentDay).FirstOrDefault();
             Log.Message("Next Hour is: " + _NextHour.ToString() + " Next Day: " + _NextDay.ToString());
 
-            int _TicksThroughDay = (int)((ticksNowAbs + this.LocalTicksOffsetFromLongitude((int)this.SettingTimeZoneLongitude)) % 60000L);
+            int _TicksThroughDay = (int)((ticksNowAbs + this.LocalTicksOffsetFromLongitude((int)this.SettingAdvancedTimeZoneLongitude)) % 60000L);
             int _TicksAtStartOfDay = ticksNowAbs - _TicksThroughDay;
             Log.Message("_TicksAtStartOfDay: " + _TicksAtStartOfDay.ToString() + " _TicksThroughDay: " + _TicksThroughDay.ToString());
 
@@ -149,19 +148,19 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
 
         private void CalculateDaysAndHoursToRunOn()
         {
-            Log.Message("Parsing Days: " + SettingScreenshotDays + " Hours: " + SettingScreenshotHours);
-            this.m_ScreenshotDays = SettingScreenshotDays.ToString().Split(',').Select(int.Parse).ToList();
-            this.m_ScreenshotHours = SettingScreenshotHours.ToString().Split(',').Select(int.Parse).ToList();
+            Log.Message("Parsing Days: " + SettingAdvancedScreenshotDays + " Hours: " + SettingAdvancedScreenshotHours);
+            this.m_ScreenshotDays = SettingAdvancedScreenshotDays.ToString().Split(',').Select(int.Parse).ToList();
+            this.m_ScreenshotHours = SettingAdvancedScreenshotHours.ToString().Split(',').Select(int.Parse).ToList();
             Log.Message("Days" + m_ScreenshotDays.Count.ToString() + " Hours: " + m_ScreenshotHours.Count.ToString());
         }
 
         private void InitiliseLongitudeIfRequired()
         {
-            if (this.SettingRecalculateLongitudeNext)
+            if (this.SettingAdvancedRecalculateLongitudeNext)
             {
-                this.SettingTimeZoneLongitude.Value = Find.WorldGrid.LongLatOf(Find.VisibleMap.Tile).x;
+                this.SettingAdvancedTimeZoneLongitude.Value = Find.WorldGrid.LongLatOf(Find.VisibleMap.Tile).x;
 
-                this.SettingRecalculateLongitudeNext.Value = false;
+                this.SettingAdvancedRecalculateLongitudeNext.Value = false;
                 this.m_NextRunTicks = 0; //Reset to 0 so it will be recalculated.
                 HugsLibController.SettingsManager.SaveChanges();
 
@@ -193,10 +192,10 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
                 string _FullFilePath = _ScreenshotFolderPath;
                 // _FullFilePath = _FullFilePath + (object)Path.DirectorySeparatorChar + GenDate.DaysPassedFloat.ToString() + ".jpg";
                 _FullFilePath = _FullFilePath + (object)Path.DirectorySeparatorChar +
-                                GenDate.Year(ticksNowAbs, this.SettingTimeZoneLongitude) + "-" +
-                                GenDate.Season(ticksNowAbs, this.SettingTimeZoneLongitude) + "-" +
-                                (GenDate.DayOfSeason(ticksNowAbs, this.SettingTimeZoneLongitude) + 1).ToString().PadLeft(2, '0') + "-" +
-                                GenDate.HourOfDay(ticksNowAbs, this.SettingTimeZoneLongitude).ToString().PadLeft(2, '0') + ".jpg";
+                                GenDate.Year(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude) + "-" +
+                                GenDate.Season(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude) + "-" +
+                                (GenDate.DayOfSeason(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude) + 1).ToString().PadLeft(2, '0') + "-" +
+                                GenDate.HourOfDay(ticksNowAbs, this.SettingAdvancedTimeZoneLongitude).ToString().PadLeft(2, '0') + ".jpg";
 
                 Log.Message(_FullFilePath);
                 Application.CaptureScreenshot(_FullFilePath);
@@ -216,12 +215,12 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         private SettingHandle<bool> SettingRecalculateTimeOrigin;
         private SettingHandle<bool> SettingAdvancedMode;
 
-        private SettingHandle<bool> SettingRecalculateLongitudeNext;
-        private SettingHandle<float> SettingTimeZoneLongitude;
+        private SettingHandle<bool> SettingAdvancedRecalculateLongitudeNext;
+        private SettingHandle<float> SettingAdvancedTimeZoneLongitude;
         //private SettingHandle<float> SettingCheckIntervalTicks;
 
-        private SettingHandle<string> SettingScreenshotHours;
-        private SettingHandle<string> SettingScreenshotDays;
+        private SettingHandle<string> SettingAdvancedScreenshotHours;
+        private SettingHandle<string> SettingAdvancedScreenshotDays;
 
         private SettingHandle<string> SettingMessageLabel;
         private SettingHandle<string> SettingMessageContent;
