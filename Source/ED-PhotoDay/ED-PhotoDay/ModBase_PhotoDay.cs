@@ -34,7 +34,8 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
             int _TicksNowAbs = Find.TickManager.TicksAbs;
 
 
-            if (this.SettingAdvancedMode)
+            //if (this.SettingAdvancedMode) //Advanced mode is not working yet.
+            if (false)
             {
 
                 //Check SettingCheckIntervalTicks
@@ -218,7 +219,7 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
         private SettingHandle<bool> SettingAutoScreenshot;
         private SettingHandle<bool> SettingAutoPause;
         private SettingHandle<bool> SettingDisplayMessage;
-        
+
         private SettingHandle<float> SettingHourDelay;
         private SettingHandle<int> SettingTimeOriginTicksAbs;
         private SettingHandle<bool> SettingRecalculateTimeOrigin;
@@ -237,16 +238,16 @@ namespace EnhancedDevelopment.Example.ED_PhotoDay
 
         public override void DefsLoaded()
         {
-            this.SettingModRunning = Settings.GetHandle<bool>("ModRunning", "Mod Running", "True for the mod to do anything.", false);
-            this.SettingAutoScreenshot = Settings.GetHandle<bool>("AutoScreenshot", "Auto Screenshot", "Take a Screenshot and dont pause or show a message.", false);
+            this.SettingModRunning = Settings.GetHandle<bool>("ModRunning", "Mod Running", "Should the mod to do anything.", false);
+            this.SettingAutoScreenshot = Settings.GetHandle<bool>("AutoScreenshot", "Auto Screenshot", "Take a Screenshots.", false);
             this.SettingAutoPause = Settings.GetHandle<bool>("AutoPause", "Auto Pause", "Pause the game.", true);
             this.SettingDisplayMessage = Settings.GetHandle<bool>("DisplayMessage", "Display Message", "Show a message.", true);
 
             this.SettingHourDelay = Settings.GetHandle<float>("SettingHourDelay", "Hour Delay", "The number of ingame Hours to wait before taking images.", 24.0f);
-            this.SettingTimeOriginTicksAbs = Settings.GetHandle<int>("TimeOriginTicksAbs", "Time Origin Ticks Abs", "The Tick to use for as the Start Time, best to set using the floowing option.", 0);
+            this.SettingTimeOriginTicksAbs = Settings.GetHandle<int>("TimeOriginTicksAbs", "Time Origin Ticks Abs", "The Tick to use for as the Start Time, best to set using the next option.", 0);
             this.SettingRecalculateTimeOrigin = Settings.GetHandle<bool>("RecalculateTimeOrigin", "Reset Time Origin", "Resets the Time Origin to the Current Time", true);
 
-            this.SettingAdvancedMode = Settings.GetHandle<bool>("AdvancedMode", "Advanced Mode", "Enabled Advanced Mode, not Currently Working.", false);
+            // this.SettingAdvancedMode = Settings.GetHandle<bool>("AdvancedMode", "Advanced Mode", "Enabled Advanced Mode, not Currently Working.", false);
 
             //this.SettingRecalculateLongitudeNext = Settings.GetHandle<bool>("RecalculateLongitude", "Recalculate Longitude", "Recalculate Longitude on next run.", true);
             //this.SettingTimeZoneLongitude = Settings.GetHandle<float>("TimeZoneLongitude", "Time Zone Longitude", "The Longitude of the location to use as the refrence for Times.", 0.0f);
